@@ -54,7 +54,7 @@ impl Solution {
     }
 
     // [3, 4, 2]
-    fn delete_and_earn_fast(mut nums: Vec<i32>) -> i32 {
+    fn delete_and_earn_fastest(mut nums: Vec<i32>) -> i32 {
         // Operating on a sorted array
         // Sort it to remove the logic for removing N-1
         nums.sort();
@@ -112,32 +112,52 @@ impl Solution {
             max(s1 + s, s2)
         }
     }
+
+    pub fn delete_and_earn_fast(nums: Vec<i32>) -> i32 {
+        let n: usize = nums.len();
+        let max_num = 10001_i32; // 10^4
+        let mut freq_map = vec![0_i32; max_num as usize + 1];
+        for i in 0..n {
+            let value = nums[i];
+            freq_map[value as usize] += value;
+        }
+
+        let mut prev_max: i32 = freq_map[0];
+        let mut curr_max: i32 = 0;
+
+        for i in 1..freq_map.len() {
+            let temp = curr_max;
+            curr_max = max(prev_max + freq_map[i], curr_max);
+            prev_max = temp;
+        }
+
+        curr_max
+    }
 }
 
 fn main() {
     Solution::delete_and_earn_fast([3, 4, 2].to_vec());
 
+    let input = [
+        6, 9, 6, 7, 8, 10, 5, 2, 7, 2, 3, 1, 5, 5, 6, 10, 8, 6, 4, 10, 1, 6, 6, 7, 4, 3, 7, 9, 10,
+        2, 5, 9, 9, 8, 2, 10, 4, 2, 2, 5, 10, 6, 10, 1, 10, 4, 5, 1, 8, 6,
+    ]
+    .to_vec();
+
     let timer = Instant::now();
-    let result = Solution::delete_and_earn_slow(
-        [
-            6, 9, 6, 7, 8, 10, 5, 2, 7, 2, 3, 1, 5, 5, 6, 10, 8, 6, 4, 10, 1, 6, 6, 7, 4, 3, 7, 9,
-            10, 2, 5, 9, 9, 8, 2, 10, 4, 2, 2, 5, 10, 6, 10, 1, 10, 4, 5, 1, 8, 6,
-        ]
-        .to_vec(),
-    );
+    let result = Solution::delete_and_earn_slow(input.clone());
     let duration = timer.elapsed();
     println!("Result HashMap: {} - {:?}", result, duration);
 
     let timer = Instant::now();
-    let result = Solution::delete_and_earn_fast(
-        [
-            6, 9, 6, 7, 8, 10, 5, 2, 7, 2, 3, 1, 5, 5, 6, 10, 8, 6, 4, 10, 1, 6, 6, 7, 4, 3, 7, 9,
-            10, 2, 5, 9, 9, 8, 2, 10, 4, 2, 2, 5, 10, 6, 10, 1, 10, 4, 5, 1, 8, 6,
-        ]
-        .to_vec(),
-    );
+    let result = Solution::delete_and_earn_fast(input.clone());
     let duration = timer.elapsed();
     println!("Result Array: {} - {:?}", result, duration);
+
+    let timer = Instant::now();
+    let result = Solution::delete_and_earn_fastest(input.clone());
+    let duration = timer.elapsed();
+    println!("Precaculated Array with loop: {} - {:?}", result, duration);
 }
 
 #[cfg(test)]
@@ -152,5 +172,10 @@ mod tests {
     #[test]
     fn exmpale_two() {
         assert_eq!(Solution::delete_and_earn_slow(vec![2, 2, 3, 3, 3, 4]), 9);
+    }
+
+    #[test]
+    fn exmpale_three() {
+        assert_eq!(Solution::delete_and_earn_fastest(vec![2, 2, 3, 3, 3, 4]), 9);
     }
 }
